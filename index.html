@@ -635,6 +635,7 @@
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("sin blob")), "image/jpeg", 0.88);
       };
       img.onerror = reject;
+      reader.readAsDataURL(file);
     });
   }
 
