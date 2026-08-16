@@ -70,6 +70,19 @@
     background: conic-gradient(from 20deg, var(--ocre), var(--esmeralda), var(--verdeazul), var(--azulvioleta), var(--rojovioleta), var(--ocre));
     flex: none;
   }
+  .logo-slot img{ width:46px; height:46px; border-radius: 14px; object-fit:cover; flex:none; display:block; }
+
+  .theme-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 14px; margin: 14px 0 18px; }
+  .theme-field{ display:flex; align-items:center; gap:10px; background: var(--panel-2); border-radius: 12px; padding: 8px 10px; }
+  .theme-field input[type=color]{ width:34px; height:34px; border:none; border-radius:8px; padding:0; background:none; flex:none; cursor:pointer; }
+  .theme-field label{ font-size:12.5px; font-weight:600; color: var(--ink); }
+
+  .crop-viewport{
+    position:relative; width:100%; max-width:480px; aspect-ratio: 21/9; margin:0 auto;
+    overflow:hidden; border-radius: 16px; background:#1a1a1a; touch-action:none; cursor:grab;
+  }
+  .crop-viewport:active{ cursor:grabbing; }
+  .crop-viewport img{ position:absolute; top:0; left:0; user-select:none; -webkit-user-drag:none; pointer-events:none; }
   .brand h1{ font-size: 22px; font-weight:800; color: var(--ink); line-height:1.1; }
   .brand .sub{ font-size: 12px; color: var(--ink-soft); font-weight:600; letter-spacing:.02em; }
   .top-actions{ display:flex; align-items:center; gap:10px; }
@@ -144,6 +157,7 @@
   .chip.genero{ background: rgba(122,75,152,0.14); color: var(--azulvioleta); }
   .chip.disp{ background: rgba(70,139,105,0.16); color: var(--verde); }
   .chip.prest{ background: rgba(228,194,97,0.35); color: #7a5c14; }
+  .chip.perdido{ background: rgba(171,71,123,0.18); color: var(--rojovioleta); }
 
   .empty-msg{ text-align:center; padding: 50px 10px; color: var(--ink-soft); font-family:'Fredoka',sans-serif; font-size:16px; }
 
@@ -213,7 +227,7 @@
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="blob"></div>
+      <div class="logo-slot" id="logo-slot"><div class="blob"></div></div>
       <div>
         <h1>Catálogo Raíz de Barro</h1>
         <div class="sub">Biblioteca Comunitaria · descubre y reserva un libro</div>
@@ -221,6 +235,9 @@
     </div>
     <div class="top-actions">
       <span id="editor-badge" class="edit-badge" style="display:none;">Modo bibliotecario</span>
+      <button class="pill-btn ghost small" id="btn-edit-logo" style="display:none;">Cambiar logo</button>
+      <button class="pill-btn ghost small" id="btn-edit-theme" style="display:none;">Personalizar diseño</button>
+      <input type="file" id="logo-file" accept="image/*" style="display:none;">
       <button class="pill-btn ghost small" id="btn-staff">Acceso del equipo</button>
       <button class="pill-btn ghost small" id="btn-logout-staff" style="display:none;">Salir</button>
     </div>
@@ -291,6 +308,22 @@
   <div class="modal">
     <button class="modal-close" data-close>×</button>
     <div style="padding:26px;" id="edit-content"></div>
+  </div>
+</div>
+
+<!-- Modal: recortar imagen del panel de inicio -->
+<div class="overlay" id="overlay-crop">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" data-close>×</button>
+    <div style="padding:26px;">
+      <h2 style="margin-bottom:4px;">Ajusta la imagen</h2>
+      <p class="form-note">Arrastra para mover la foto y usa la barra para acercar. Así eliges qué parte se verá en el panel de inicio.</p>
+      <div class="crop-viewport" id="crop-viewport">
+        <img id="crop-img" draggable="false" alt="">
+      </div>
+      <input type="range" id="crop-zoom" min="100" max="260" value="100" style="width:100%; margin-top:14px;">
+      <button class="pill-btn primary" style="width:100%; margin-top:14px;" id="crop-confirm">Usar esta selección</button>
+    </div>
   </div>
 </div>
 
@@ -417,7 +450,7 @@
       : `<div class="ph">📖</div>`;
   }
   function cardHtml(b){
-    const dispChip = b.estado === "disponible" ? `<span class="chip disp">Disponible</span>` : `<span class="chip prest">Prestado</span>`;
+    const dispChip = b.estado === "disponible" ? `<span class="chip disp">Disponible</span>` : (b.estado === "perdido" ? `<span class="chip perdido">No disponible</span>` : `<span class="chip prest">Prestado</span>`);
     const genChip = b.genero ? `<span class="chip genero">${escapeHtml(b.genero)}</span>` : "";
     return `<div class="card" data-id="${escapeHtml(b.id)}">
       <div class="cover">${coverImg(b)}</div>
@@ -479,16 +512,18 @@
           <div><b>Idioma</b>${escapeHtml(b.idioma||"—")}</div>
           <div><b>ISBN</b>${escapeHtml(b.isbn||"—")}</div>
           <div><b>Rótulo / clasificación</b>${escapeHtml(b.rotulo||b.clasificacion||"—")}</div>
-          <div><b>Estado</b>${b.estado==="disponible"?"Disponible":"Prestado"}</div>
+          <div><b>Estado</b>${b.estado==="disponible"?"Disponible":(b.estado==="perdido"?"No disponible (perdido/dañado)":"Prestado")}</div>
         </div>
         ${b.resumen ? `<div class="resumen"><b>Resumen</b>${escapeHtml(b.resumen)}</div>` : ""}
         <div class="modal-actions">
-          <button class="pill-btn primary" id="btn-reservar">📚 Reservar este libro</button>
+          ${b.estado === "disponible"
+            ? `<button class="pill-btn primary" id="btn-reservar">📚 Reservar este libro</button>`
+            : `<span class="chip ${b.estado==="perdido"?"perdido":"prest"}" style="padding:9px 16px;">${b.estado==="perdido"?"No disponible por el momento":"Actualmente prestado"}</span>`}
           ${editBtn}
         </div>
       </div>`;
     $("#overlay-detail").classList.add("show");
-    $("#btn-reservar").addEventListener("click", ()=>{ $("#overlay-detail").classList.remove("show"); openReserva(b); });
+    if(b.estado === "disponible") $("#btn-reservar").addEventListener("click", ()=>{ $("#overlay-detail").classList.remove("show"); openReserva(b); });
     if(isEditor) $("#btn-edit-book").addEventListener("click", ()=>{ $("#overlay-detail").classList.remove("show"); openEdit(b); });
   }
 
@@ -541,6 +576,8 @@
     $("#btn-staff").style.display = isEditor ? "none" : "";
     $("#btn-logout-staff").style.display = isEditor ? "" : "none";
     $("#btn-edit-hero").style.display = isEditor ? "" : "none";
+    $("#btn-edit-logo").style.display = isEditor ? "" : "none";
+    $("#btn-edit-theme").style.display = isEditor ? "" : "none";
   }
 
   // ---------------------------------------------------------------------
@@ -597,17 +634,34 @@
   }
 
   // ---------------------------------------------------------------------
-  // Mejora automática de carátulas: recorte a 3:4, balance de blancos y
-  // estiramiento de contraste por canal, exportado en JPEG liviano.
+  // Mejora automática de imágenes: balance de blancos y estiramiento de
+  // contraste por canal, aplicado sobre un canvas ya recortado.
   // ---------------------------------------------------------------------
-  function enhanceCoverImage(file){
+  function enhanceCanvas(ctx, W, H){
+    const imgData = ctx.getImageData(0,0,W,H);
+    const d = imgData.data;
+    let min=[255,255,255], max=[0,0,0];
+    for(let i=0;i<d.length;i+=4){
+      for(let c=0;c<3;c++){ if(d[i+c]<min[c]) min[c]=d[i+c]; if(d[i+c]>max[c]) max[c]=d[i+c]; }
+    }
+    for(let i=0;i<d.length;i+=4){
+      for(let c=0;c<3;c++){
+        const range = Math.max(1, max[c]-min[c]);
+        let v = (d[i+c]-min[c]) * (255/range);
+        v = (v-128)*1.08 + 128 + 6;
+        d[i+c] = Math.max(0, Math.min(255, v));
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+
+  function enhanceCoverImage(file, W=600, H=800){
     return new Promise((resolve, reject)=>{
       const img = new Image();
       const reader = new FileReader();
       reader.onload = ()=> img.src = reader.result;
       reader.onerror = reject;
       img.onload = ()=>{
-        const W = 600, H = 800;
         const canvas = document.createElement("canvas");
         canvas.width = W; canvas.height = H;
         const ctx = canvas.getContext("2d");
@@ -616,22 +670,7 @@
         if(srcRatio > dstRatio){ sw = img.height * dstRatio; sx = (img.width - sw)/2; }
         else{ sh = img.width / dstRatio; sy = (img.height - sh)/2; }
         ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
-
-        const imgData = ctx.getImageData(0,0,W,H);
-        const d = imgData.data;
-        let min=[255,255,255], max=[0,0,0];
-        for(let i=0;i<d.length;i+=4){
-          for(let c=0;c<3;c++){ if(d[i+c]<min[c]) min[c]=d[i+c]; if(d[i+c]>max[c]) max[c]=d[i+c]; }
-        }
-        for(let i=0;i<d.length;i+=4){
-          for(let c=0;c<3;c++){
-            const range = Math.max(1, max[c]-min[c]);
-            let v = (d[i+c]-min[c]) * (255/range);
-            v = (v-128)*1.08 + 128 + 6; // leve más de contraste y brillo
-            d[i+c] = Math.max(0, Math.min(255, v));
-          }
-        }
-        ctx.putImageData(imgData,0,0);
+        enhanceCanvas(ctx, W, H);
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("sin blob")), "image/jpeg", 0.88);
       };
       img.onerror = reject;
@@ -639,32 +678,219 @@
     });
   }
 
-  // ---------------------------------------------------------------------
-  // Edición del carrusel de inicio (solo bibliotecarios)
-  // ---------------------------------------------------------------------
+  let cropState = null;
+
+  function openCropper(file, onConfirm){
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const vp = $("#crop-viewport");
+      const viewW = vp.clientWidth || 480;
+      const viewH = vp.clientHeight || Math.round(viewW*9/21);
+      const baseScale = Math.max(viewW/img.naturalWidth, viewH/img.naturalHeight);
+      const dispW = img.naturalWidth*baseScale, dispH = img.naturalHeight*baseScale;
+      cropState = {
+        img, naturalW: img.naturalWidth, naturalH: img.naturalHeight,
+        baseScale, zoom: 1, viewW, viewH,
+        offX: (viewW - dispW)/2, offY: (viewH - dispH)/2,
+        onConfirm, objectUrl: url
+      };
+      $("#crop-img").src = url;
+      $("#crop-zoom").value = 100;
+      applyCropTransform();
+      $("#overlay-crop").classList.add("show");
+    };
+    img.onerror = ()=> toast("No se pudo cargar la imagen.");
+    img.src = url;
+  }
+
+  function clampCropOffsets(){
+    const s = cropState; if(!s) return;
+    const scale = s.baseScale * s.zoom;
+    const dispW = s.naturalW*scale, dispH = s.naturalH*scale;
+    s.offX = Math.max(Math.min(0, s.viewW - dispW), Math.min(0, s.offX));
+    s.offY = Math.max(Math.min(0, s.viewH - dispH), Math.min(0, s.offY));
+  }
+
+  function applyCropTransform(){
+    const s = cropState; if(!s) return;
+    clampCropOffsets();
+    const scale = s.baseScale * s.zoom;
+    const el = $("#crop-img");
+    el.style.width = (s.naturalW*scale)+"px";
+    el.style.height = (s.naturalH*scale)+"px";
+    el.style.transform = `translate(${s.offX}px, ${s.offY}px)`;
+  }
+
+  (function setupCropDrag(){
+    const vp = $("#crop-viewport");
+    let dragging=false, startX=0, startY=0, startOffX=0, startOffY=0;
+    vp.addEventListener("pointerdown", e=>{
+      if(!cropState) return;
+      dragging=true; vp.setPointerCapture(e.pointerId);
+      startX=e.clientX; startY=e.clientY; startOffX=cropState.offX; startOffY=cropState.offY;
+    });
+    vp.addEventListener("pointermove", e=>{
+      if(!dragging || !cropState) return;
+      cropState.offX = startOffX + (e.clientX-startX);
+      cropState.offY = startOffY + (e.clientY-startY);
+      applyCropTransform();
+    });
+    vp.addEventListener("pointerup", ()=> dragging=false);
+    vp.addEventListener("pointercancel", ()=> dragging=false);
+  })();
+
+  $("#crop-zoom").addEventListener("input", e=>{
+    if(!cropState) return;
+    cropState.zoom = e.target.value/100;
+    applyCropTransform();
+  });
+
+  $("#crop-confirm").addEventListener("click", ()=>{
+    const s = cropState; if(!s) return;
+    const scale = s.baseScale * s.zoom;
+    const sx = -s.offX/scale, sy = -s.offY/scale;
+    const sw = s.viewW/scale, sh = s.viewH/scale;
+    const OUT_W = 1200, OUT_H = Math.round(OUT_W * s.viewH/s.viewW);
+    const canvas = document.createElement("canvas");
+    canvas.width = OUT_W; canvas.height = OUT_H;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(s.img, sx, sy, sw, sh, 0, 0, OUT_W, OUT_H);
+    enhanceCanvas(ctx, OUT_W, OUT_H);
+    canvas.toBlob(blob=>{
+      $("#overlay-crop").classList.remove("show");
+      URL.revokeObjectURL(s.objectUrl);
+      const cb = s.onConfirm; cropState = null;
+      if(blob && cb) cb(blob);
+      else if(!blob) toast("No se pudo procesar la imagen.");
+    }, "image/jpeg", 0.88);
+  });
+
+  const THEME_FIELDS = [
+    { key: "--bg", label: "Fondo de la página" },
+    { key: "--ink", label: "Texto / acento principal" },
+    { key: "--ink-soft", label: "Texto secundario" },
+    { key: "--ocre", label: "Color 1 (ocre)" },
+    { key: "--esmeralda", label: "Color 2 (esmeralda)" },
+    { key: "--verdeazul", label: "Color 3 (verde azulado)" },
+    { key: "--azulvioleta", label: "Color 4 (azul violeta)" },
+    { key: "--rojovioleta", label: "Color 5 (rojo violeta)" },
+    { key: "--azul", label: "Color 6 (azul)" },
+    { key: "--verde", label: "Color 7 (verde)" },
+    { key: "--verdeamarillo", label: "Color 8 (verde amarillo)" }
+  ];
+  const DEFAULT_THEME = {
+    "--bg":"#fffaf1", "--ink":"#8b4545", "--ink-soft":"#7a4b98",
+    "--ocre":"#e4c261", "--esmeralda":"#6bb96b", "--verdeazul":"#447f8d",
+    "--azulvioleta":"#7a4b98", "--rojovioleta":"#ab477b", "--azul":"#4a69ac",
+    "--verde":"#468b69", "--verdeamarillo":"#accb49"
+  };
+  let themeOverrides = {};
+
+  function applyTheme(){
+    Object.entries(themeOverrides).forEach(([k,v])=> document.documentElement.style.setProperty(k, v));
+  }
+  function currentThemeValue(key){
+    if(themeOverrides[key]) return themeOverrides[key];
+    const v = getComputedStyle(document.documentElement).getPropertyValue(key).trim();
+    return v || DEFAULT_THEME[key] || "#000000";
+  }
+
+  $("#btn-edit-theme").addEventListener("click", ()=>{
+    $("#edit-content").innerHTML = `
+      <h2>Personalizar diseño</h2>
+      <p class="form-note">Elige los colores del catálogo. Los cambios se ven al instante y quedan guardados para todos los visitantes.</p>
+      <div class="theme-grid">
+        ${THEME_FIELDS.map(f => `
+          <div class="theme-field">
+            <input type="color" data-var="${f.key}" value="${currentThemeValue(f.key)}">
+            <label>${escapeHtml(f.label)}</label>
+          </div>`).join("")}
+      </div>
+      <div class="solic-actions" style="margin-top:0;">
+        <button class="pill-btn primary" id="theme-save">Guardar colores</button>
+        <button class="pill-btn ghost" id="theme-reset">Restablecer colores originales</button>
+      </div>`;
+    $("#overlay-edit").classList.add("show");
+
+    $$("#edit-content input[type=color]").forEach(inp=>{
+      inp.addEventListener("input", ()=> document.documentElement.style.setProperty(inp.dataset.var, inp.value));
+    });
+    $("#theme-save").addEventListener("click", async ()=>{
+      $$("#edit-content input[type=color]").forEach(inp=>{ themeOverrides[inp.dataset.var] = inp.value; });
+      applyTheme();
+      await saveConfig();
+      toast("Colores guardados.");
+      $("#overlay-edit").classList.remove("show");
+    });
+    $("#theme-reset").addEventListener("click", async ()=>{
+      Object.keys(themeOverrides).forEach(k => document.documentElement.style.removeProperty(k));
+      themeOverrides = {};
+      await saveConfig();
+      toast("Colores originales restablecidos.");
+      $("#overlay-edit").classList.remove("show");
+    });
+  });
+
+  let logoUrl = "";
+  function renderLogo(){
+    $("#logo-slot").innerHTML = logoUrl
+      ? `<img src="${escapeHtml(logoUrl)}" alt="Logo de la biblioteca">`
+      : `<div class="blob"></div>`;
+  }
+  async function loadConfig(){
+    const raw = await kvGet("config_catalogo");
+    const cfg = raw ? JSON.parse(raw) : {};
+    logoUrl = cfg.logoUrl || "";
+    themeOverrides = cfg.theme || {};
+    applyTheme();
+  }
+  async function saveConfig(){
+    await kvSet("config_catalogo", JSON.stringify({ logoUrl, theme: themeOverrides }));
+  }
+  $("#btn-edit-logo").addEventListener("click", ()=> $("#logo-file").click());
+  $("#logo-file").addEventListener("change", async (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    toast("Actualizando logo…");
+    try{
+      const blob = await enhanceCoverImage(file, 240, 240);
+      const path = `logo-${Date.now()}.jpg`;
+      const { error } = await supabaseClient.storage.from("carrusel").upload(path, blob, { upsert:true, contentType:"image/jpeg" });
+      if(error) throw error;
+      const { data } = supabaseClient.storage.from("carrusel").getPublicUrl(path);
+      logoUrl = data.publicUrl;
+      await saveConfig();
+      renderLogo();
+      toast("Logo actualizado.");
+    }catch(err){ toast("No se pudo actualizar el logo."); }
+    e.target.value = "";
+  });
+
   $("#btn-edit-hero").addEventListener("click", ()=>{
     $("#edit-content").innerHTML = `
       <h2>Imágenes del panel de inicio</h2>
-      <p class="form-note">Sube imágenes destacadas para la portada del catálogo.</p>
+      <p class="form-note">Sube imágenes destacadas para la portada del catálogo. Podrás elegir qué parte de cada foto se muestra.</p>
       <div id="hero-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;"></div>
       <input type="file" id="hero-file" accept="image/*" style="display:none;">
       <button class="pill-btn ghost" id="hero-add">+ Agregar imagen</button>`;
     renderHeroEditList();
     $("#overlay-edit").classList.add("show");
     $("#hero-add").addEventListener("click", ()=> $("#hero-file").click());
-    $("#hero-file").addEventListener("change", async (e)=>{
+    $("#hero-file").addEventListener("change", (e)=>{
       const file = e.target.files[0]; if(!file) return;
-      toast("Mejorando y subiendo imagen…");
-      try{
-        const blob = await enhanceCoverImage(file);
-        const path = `hero-${Date.now()}.jpg`;
-        const { error } = await supabaseClient.storage.from("carrusel").upload(path, blob, { upsert:true, contentType:"image/jpeg" });
-        if(error) throw error;
-        const { data } = supabaseClient.storage.from("carrusel").getPublicUrl(path);
-        carrusel.push({ url: data.publicUrl, caption: "" });
-        await saveCarrusel(); renderHeroEditList(); renderHero();
-        toast("Imagen agregada.");
-      }catch(err){ toast("No se pudo subir la imagen."); }
+      openCropper(file, async (blob)=>{
+        toast("Subiendo imagen…");
+        try{
+          const path = `hero-${Date.now()}.jpg`;
+          const { error } = await supabaseClient.storage.from("carrusel").upload(path, blob, { upsert:true, contentType:"image/jpeg" });
+          if(error) throw error;
+          const { data } = supabaseClient.storage.from("carrusel").getPublicUrl(path);
+          carrusel.push({ url: data.publicUrl, caption: "" });
+          await saveCarrusel(); renderHeroEditList(); renderHero();
+          toast("Imagen agregada.");
+        }catch(err){ toast("No se pudo subir la imagen."); }
+      });
+      e.target.value = "";
     });
   });
   function renderHeroEditList(){
@@ -693,10 +919,11 @@
       if(data && data.session) isEditor = true;
     }catch(e){}
     onEditorStateChange();
-    await Promise.all([loadBooks(), loadCarrusel()]);
+    await Promise.all([loadBooks(), loadCarrusel(), loadConfig()]);
     populateFilterOptions();
     renderCatalog();
     renderHero();
+    renderLogo();
   }
   init();
 })();
