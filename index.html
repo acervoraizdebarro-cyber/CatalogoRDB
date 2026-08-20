@@ -125,7 +125,7 @@
   .hero-inner{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding: 0 20px; }
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   .page-hero{ text-align:left; max-width:640px; }
-  .page-hero .eyebrow{ display:block; font-family:'Inter',sans-serif; font-weight:800; font-size:14px; letter-spacing:.16em; color: var(--ocre); margin-bottom:10px; }
+  .page-hero .eyebrow{ display:block; font-family:'Inter',sans-serif; font-weight:800; font-size:18px; letter-spacing:.16em; color: var(--ocre); margin-bottom:10px; text-transform: uppercase; }
   .page-hero h2{ font-size: 46px; font-weight:800; color: #fff8ea; line-height:1.05; }
   .page-hero p{ margin: 12px 0 0; color: rgba(255,248,234,.92); font-size: 17px; max-width:560px; }
 
@@ -163,6 +163,7 @@
     border:2px solid transparent; border-radius:999px; padding: 11px 22px; font-weight:800; font-size:15.5px;
     font-family:'Inter',sans-serif; background: var(--pill-fg, var(--verdeazul)); color:#fff;
     transition: all .15s ease; opacity:.88;
+    box-shadow: var(--shadow-pop);
   }
   .cat-pill:hover{ transform: translateY(-1px); opacity:1; }
   .cat-pill.active{ opacity:1; box-shadow: 0 0 0 3px rgba(61,43,43,0.16); }
@@ -194,9 +195,10 @@
     position:absolute; top:12px; left:12px; background:#fff8ea; color: var(--carmin); font-weight:800;
     font-size:11.5px; padding:5px 13px; border-radius:999px; z-index:1;
   }
-  .cover-icon{
+    .cover-icon{
     position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%;
     background:#fff8ea; display:flex; align-items:center; justify-content:center; font-size:14px; z-index:1;
+    color: var(--carmin);
   }
   .card .info{ padding: 18px 20px 20px; flex:1; display:flex; flex-direction:column; gap:10px; }
   .tags-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
@@ -229,7 +231,7 @@
   .carousel-strip .card{ min-width: 178px; max-width:178px; scroll-snap-align:start; }
 
   /* ---------- Banner inferior (imágenes del panel de inicio) ---------- */
-    .hero{ position:relative; margin: 8px 0 0; aspect-ratio: 4.5 / 1; }
+  .hero{ position:relative; margin: 30px calc(50% - 50vw) 0; width: 100vw; aspect-ratio: 4.5 / 1; }
   .hero-media{
     position:absolute; inset:0; overflow:hidden;
     background: linear-gradient(120deg, var(--verdeazul), var(--azulvioleta) 60%, var(--rojovioleta));
@@ -304,10 +306,10 @@
   }
   .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
-    footer.site{
-    text-align:center; color:#fff8ea; font-size:12.5px; font-weight:600; margin-top: 12px;
-    padding: 16px 20px; background: var(--verde); border-radius: var(--radius);
-    box-shadow: var(--shadow-gray);
+  footer.site{
+    text-align:center; color:#fff8ea; font-size:12.5px; font-weight:600;
+    margin: 26px calc(50% - 50vw) 0; width: 100vw;
+    padding: 16px 20px; background: var(--verde);
   }
 
   @media (max-width: 640px){
@@ -544,7 +546,7 @@
   function renderHero(){
     const track = $("#hero-track"), dots = $("#hero-dots");
     if(carrusel.length === 0){
-      track.innerHTML = `<div class="hero-slide empty"><div class="cap">📚 Bienvenidos a la Biblioteca Raíz de Barro</div></div>`;
+      track.innerHTML = `<div class="hero-slide empty"><div class="cap"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:6px;"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Bienvenidos a la Biblioteca Raíz de Barro</div></div>`;
       dots.innerHTML = "";
       $("#hero-prev").style.display = "none"; $("#hero-next").style.display = "none";
       return;
@@ -647,7 +649,7 @@
     return `<div class="card" data-id="${escapeHtml(b.id)}">
       <div class="cover">
         ${genTag}
-        <span class="cover-icon">📚</span>
+        <span class="cover-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
         ${coverImg(b)}
       </div>
       <div class="info">
@@ -719,7 +721,7 @@
         ${b.resumen ? `<div class="resumen"><b>Resumen</b>${escapeHtml(b.resumen)}</div>` : ""}
         <div class="modal-actions">
           ${b.estado === "disponible"
-            ? `<button class="pill-btn primary" id="btn-reservar">📚 Reservar este libro</button>`
+            ? `<button class="pill-btn primary" id="btn-reservar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px; margin-right:6px;"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Reservar este libro</button>`
             : `<span class="chip ${b.estado==="perdido"?"perdido":"prest"}" style="padding:9px 16px;">${b.estado==="perdido"?"No disponible por el momento":"Actualmente prestado"}</span>`}
           ${editBtn}
         </div>
