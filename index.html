@@ -11,20 +11,27 @@
 
   Para GitHub Pages: sube este archivo (puedes llamarlo catalogo.html o
   index.html) a un repositorio y activa Pages — no necesita build.
+
+  Diseño visual inspirado en story-book-sparkle.lovable.app: tarjetas
+  claras, categorías como pastillas de color, barra de búsqueda con
+  botón de Filtro y banner inferior con las imágenes del panel de inicio.
 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo Raíz de Barro</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg: #fffaf1;
+    --bg: #fbf7ee;
     --panel: #ffffff;
     --panel-2: rgba(68,127,141,0.07);
-    --ink: #8b4545;
-    --ink-soft: #7a4b98;
-    --line: rgba(139,69,69,0.16);
+    --ink: #3d2b2b;
+    --ink-soft: #7a6a6a;
+    --line: rgba(61,43,43,0.10);
 
     --ocre: #e4c261;
     --carmin: #8b4545;
@@ -38,68 +45,191 @@
     --verdeamarillo: #accb49;
 
     --teal: var(--verdeazul);
-    --danger: var(--carmin);
-    --radius: 18px;
-    --shadow: 0 4px 0 rgba(139,69,69,0.10), 0 10px 24px rgba(139,69,69,0.10);
+    --danger: #c0392b;
+    --radius: 20px;
+    --shadow: 0 1px 2px rgba(61,43,43,0.06), 0 8px 20px rgba(61,43,43,0.06);
+    --shadow-lg: 0 20px 50px rgba(61,43,43,0.16);
     font-size: 16px;
   }
   *{ box-sizing: border-box; }
   body{
     margin:0; background: var(--bg); color: var(--ink);
-    font-family: 'Inter', system-ui, sans-serif; line-height: 1.45;
+    font-family: 'Inter', system-ui, sans-serif; line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    background-image: radial-gradient(circle at 6% 8%, rgba(228,194,97,0.16) 0, transparent 40%),
-                       radial-gradient(circle at 96% 18%, rgba(107,185,107,0.14) 0, transparent 38%),
-                       radial-gradient(circle at 92% 92%, rgba(122,75,152,0.12) 0, transparent 40%);
-    background-attachment: fixed;
   }
-  .wrap{ max-width: 1180px; margin:0 auto; padding: 18px 20px 70px; }
+  .wrap{ max-width: 1180px; margin:0 auto; padding: 22px 20px 70px; }
   h1,h2,h3{ font-family:'Baloo 2', Georgia, sans-serif; margin:0; }
   .hand{ font-family:'Fredoka', 'Baloo 2', sans-serif; }
   a{ color: inherit; }
-  button{ font-family:'Inter', sans-serif; cursor:pointer; }
+  button{ font-family:'Baloo 2','Inter', sans-serif; cursor:pointer; }
 
   /* ---------- Header ---------- */
   header.top{
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
-    padding: 10px 4px 18px; flex-wrap: wrap;
+    display:flex; align-items:center; justify-content:flex-end; gap:14px;
+    padding: 0 0 22px; margin: 0; flex-wrap: wrap;
   }
   .brand{ display:flex; align-items:center; gap:12px; }
   .brand .blob{
-    width:46px; height:46px; border-radius: 40% 60% 55% 45% / 50% 45% 55% 50%;
-    background: conic-gradient(from 20deg, var(--ocre), var(--esmeralda), var(--verdeazul), var(--azulvioleta), var(--rojovioleta), var(--ocre));
-    flex: none;
+    width:42px; height:42px; border-radius: 40% 60% 55% 45% / 50% 45% 55% 50%;
+    background: conic-gradient(from 20deg, var(--ocre), var(--esmeralda), var(--verdeclaro), var(--azulvioleta), var(--rojovioleta), var(--ocre));
+    flex: none; border:2px solid rgba(255,248,234,.5);
   }
-  .logo-slot img{ width:46px; height:46px; border-radius: 14px; object-fit:cover; flex:none; display:block; }
+  .logo-slot img{ width:42px; height:42px; border-radius: 13px; object-fit:cover; flex:none; display:block; border:2px solid rgba(255,248,234,.5); }
 
   .theme-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 14px; margin: 14px 0 18px; }
-  .theme-field{ display:flex; align-items:center; gap:10px; background: var(--panel-2); border-radius: 12px; padding: 8px 10px; }
-  .theme-field input[type=color]{ width:34px; height:34px; border:none; border-radius:8px; padding:0; background:none; flex:none; cursor:pointer; }
-  .theme-field label{ font-size:12.5px; font-weight:600; color: var(--ink); }
+  .theme-field{ display:flex; align-items:center; gap:10px; background: var(--panel-2); border:2px solid var(--line); border-radius: 16px; padding: 8px 10px; }
+  .theme-field input[type=color]{ width:34px; height:34px; border:none; border-radius:10px; padding:0; background:none; flex:none; cursor:pointer; }
+  .theme-field label{ font-size:12.5px; font-weight:700; color: var(--ink); }
 
   .crop-viewport{
     position:relative; width:100%; max-width:480px; aspect-ratio: 3/1; margin:0 auto;
-    overflow:hidden; border-radius: 16px; background:#1a1a1a; touch-action:none; cursor:grab;
+    overflow:hidden; border-radius: 20px; background:#1a1a1a; touch-action:none; cursor:grab;
+    border:3px solid var(--line);
   }
   .crop-viewport:active{ cursor:grabbing; }
   .crop-viewport img{ position:absolute; top:0; left:0; user-select:none; -webkit-user-drag:none; pointer-events:none; }
-  .brand h1{ font-size: 22px; font-weight:800; color: var(--ink); line-height:1.1; }
-  .brand .sub{ font-size: 12px; color: var(--ink-soft); font-weight:600; letter-spacing:.02em; }
-  .top-actions{ display:flex; align-items:center; gap:10px; }
+  .brand h1{ font-size: 19px; font-weight:800; color: #fff8ea; line-height:1.1; letter-spacing:.01em; }
+  .brand .sub{ font-family:'Inter',sans-serif; font-size: 12px; color: rgba(255,248,234,.8); font-weight:600; }
+  .top-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .pill-btn{
-    border:none; border-radius:999px; padding:10px 18px; font-weight:700; font-size:13px;
-    box-shadow: var(--shadow); transition: transform .12s ease;
+    border:2px solid transparent; border-radius:999px; padding:10px 20px; font-weight:700; font-size:13.5px;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease, opacity .12s ease;
+    background: var(--panel-2); color: var(--ink);
   }
-  .pill-btn:hover{ transform: translateY(-2px); }
+  .pill-btn:hover{ transform: translateY(-1px); }
   .pill-btn:active{ transform: translateY(0); }
-  .pill-btn.primary{ background: var(--esmeralda); color:#fff; }
-  .pill-btn.ghost{ background:#fff; color: var(--ink); border:2px solid var(--line); box-shadow:none; }
-  .pill-btn.small{ padding:7px 14px; font-size:12px; }
+  .pill-btn.primary{ background: var(--verde); color:#fff; box-shadow: var(--shadow); }
+  .pill-btn.primary:hover{ background: var(--esmeralda); }
+  .pill-btn.ghost{ background:#fff; color: var(--ink); border:2px solid var(--line); }
+  .pill-btn.ghost:hover{ border-color: var(--verdeazul); color: var(--verdeazul); }
+  .pill-btn.small{ padding:8px 15px; font-size:12.5px; }
+  .pill-btn[disabled]{ opacity:.5; cursor:default; transform:none; }
 
-  /* ---------- Hero carrusel ---------- */
+  /* ---------- Franja superior (encabezado + búsqueda), ancho completo ---------- */
+  .site-hero{
+    position:relative; background: var(--verdeazul);
+    padding-top: 18px; padding-bottom: 34px; margin-bottom: 26px;
+  }
+  .site-hero-decor{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .site-hero-decor::before{
+    content:""; position:absolute; top:-60px; left:-40px; width:220px; height:220px; border-radius:50%;
+    background: rgba(255,248,234,0.14);
+  }
+  .site-hero-decor::after{
+    content:""; position:absolute; bottom:-90px; right:4%; width:230px; height:230px; border-radius:50%;
+    background: rgba(137,196,177,0.30);
+  }
+  .hero-inner{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding: 0 20px; }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .page-hero{ text-align:left; max-width:640px; }
+  .page-hero .eyebrow{ display:block; font-family:'Inter',sans-serif; font-weight:800; font-size:12px; letter-spacing:.14em; color: var(--ocre); margin-bottom:8px; }
+  .page-hero h2{ font-size: 34px; font-weight:800; color: #fff8ea; }
+  .page-hero p{ margin: 8px 0 0; color: rgba(255,248,234,.9); font-size: 15px; max-width:560px; }
+
+  /* ---------- Barra de búsqueda + filtro ---------- */
+  .search-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 20px; }
+  .search-box{
+    flex:1; min-width:220px; display:flex; align-items:center; gap:10px; background:#fdf6e6;
+    border:3px solid var(--ocre); border-radius: 999px; padding: 4px 6px 4px 18px; box-shadow: var(--shadow);
+  }
+  .search-box svg{ flex:none; opacity:.5; }
+  .search-box input{
+    flex:1; border:none; outline:none; background:transparent; font-family:'Inter',sans-serif;
+    font-weight:500; font-size:14.5px; color: var(--ink); padding: 10px 0;
+  }
+  .btn-buscar{ background: var(--ocre); color: var(--carmin); border:2px solid var(--carmin); }
+  .btn-buscar:hover{ background:#ecce78; }
+  .pill-btn.on-dark{ background: transparent; color:#fff8ea; border:2px solid rgba(255,248,234,.65); }
+  .pill-btn.on-dark:hover{ border-color:#fff8ea; }
+  .filtro-wrap{ position:relative; }
+  .filtro-panel{
+    display:none; position:absolute; top: calc(100% + 10px); right:0; z-index: 30; width: 260px;
+    background:#fff; border:2px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: var(--shadow-lg);
+  }
+  .filtro-panel.show{ display:block; }
+  .filtro-panel .field label{ margin-bottom:4px; }
+  .filtro-panel select{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px; padding: 10px 12px; border-radius: 12px;
+    border: 2px solid var(--line); background:#fff; color: var(--ink); width:100%;
+  }
+
+  /* ---------- Categorías ---------- */
+  .cat-label{ font-size:15px; font-weight:800; color: var(--carmin); margin-bottom: 12px; }
+  .category-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 30px; }
+  .cat-pill{
+    border:2px solid transparent; border-radius:999px; padding: 10px 20px; font-weight:700; font-size:13.5px;
+    font-family:'Inter',sans-serif; background: var(--pill-fg, var(--verdeazul)); color:#fff;
+    transition: all .15s ease; opacity:.88;
+  }
+  .cat-pill:hover{ transform: translateY(-1px); opacity:1; }
+  .cat-pill.active{ opacity:1; box-shadow: 0 0 0 3px rgba(61,43,43,0.16); }
+
+  /* ---------- Encabezado de listado ---------- */
+  .catalog-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom: 18px; }
+  .catalog-head h3{ font-size: 22px; color: var(--carmin); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .count-badge{ font-family:'Inter',sans-serif; font-weight:800; font-size:12.5px; color: var(--carmin); background: var(--ocre); padding: 6px 15px; border-radius:999px; }
+  .view-toggle{ display:flex; gap:5px; background: var(--panel-2); border-radius: 999px; padding:4px; border:2px solid var(--line); }
+  .view-toggle button{
+    border:none; background:transparent; padding: 8px 15px; border-radius: 999px; font-weight:700; font-size:12.5px; color: var(--ink-soft);
+  }
+  .view-toggle button.active{ background: var(--verde); color: #fff; }
+
+  /* ---------- Grid normal ---------- */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 22px; }
+  .card{
+    background:#fff; border-radius: var(--radius); overflow:hidden; cursor:pointer;
+    box-shadow: var(--shadow);
+    transition: transform .16s ease, box-shadow .16s ease;
+    display:flex; flex-direction:column;
+  }
+  .card:hover{ transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .card .cover{ aspect-ratio: 4/3; background: var(--panel-2); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+  .card .cover img{ width:100%; height:100%; object-fit:cover; }
+  /* Portada de color liso cuando el libro no tiene imagen */
+  .ph-color{ width:100%; height:100%; }
+  .cover-tag{
+    position:absolute; top:12px; left:12px; background:#fff8ea; color: var(--carmin); font-weight:800;
+    font-size:11.5px; padding:5px 13px; border-radius:999px; z-index:1;
+  }
+  .cover-icon{
+    position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%;
+    background:#fff8ea; display:flex; align-items:center; justify-content:center; font-size:14px; z-index:1;
+  }
+  .card .info{ padding: 14px 16px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .tags-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .card .t{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size: 17px; line-height:1.25; color: var(--carmin); }
+  .card .a{ font-size: 12.5px; color: var(--rojovioleta); font-weight:600; margin-top:-4px; }
+  .chip{ font-size:10.5px; font-weight:800; padding: 5px 12px; border-radius: 999px; letter-spacing:.03em; border:none; color:#fff; }
+  .chip.disp{ background: var(--esmeralda); }
+  .chip.prest{ background: var(--rojovioleta); }
+  .chip.perdido{ background: var(--carmin); }
+  .card-actions{ display:flex; gap:8px; margin-top:auto; padding-top:6px; }
+  .card-actions .pill-btn{ flex:1; text-align:center; padding:10px 10px; font-size:12.5px; border:none; }
+  .btn-ver{ background: var(--azul); color:#fff; }
+  .btn-ver:hover{ background: #3d5b96; }
+  .btn-reservar{ background: var(--ocre); color: var(--carmin); }
+  .btn-reservar:hover{ background:#ecce78; }
+
+  .empty-msg{
+    text-align:center; padding: 46px 20px; color: var(--ink-soft); font-family:'Fredoka',sans-serif; font-size:17px;
+    background:#fff; border:2px dashed var(--line); border-radius: 28px;
+  }
+
+  /* ---------- Modo carrusel por género ---------- */
+  .genre-row{ margin-bottom: 30px; }
+  .genre-row h3{ font-size: 18px; margin-bottom:12px; display:flex; align-items:center; gap:9px; }
+  .genre-row h3 .dot{ width:14px; height:14px; border-radius:50%; }
+  .carousel-strip{ display:flex; gap:16px; overflow-x:auto; padding: 4px 2px 10px; scroll-snap-type: x mandatory; }
+  .carousel-strip::-webkit-scrollbar{ height:8px; }
+  .carousel-strip::-webkit-scrollbar-track{ background: rgba(61,43,43,.06); border-radius:8px; }
+  .carousel-strip::-webkit-scrollbar-thumb{ background: var(--verdeclaro); border-radius:8px; }
+  .carousel-strip .card{ min-width: 178px; max-width:178px; scroll-snap-align:start; }
+
+  /* ---------- Banner inferior (imágenes del panel de inicio) ---------- */
   .hero{
-    position:relative; border-radius: 28px; overflow:hidden; margin: 6px 0 26px;
-    box-shadow: var(--shadow); background: linear-gradient(120deg, var(--verdeazul), var(--azulvioleta));
+    position:relative; border-radius: 30px 30px 0 0; overflow:hidden; margin: 8px 0 0;
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(120deg, var(--verdeazul), var(--azulvioleta) 60%, var(--rojovioleta));
     aspect-ratio: 3 / 1;
   }
   .hero-track{ display:flex; height:100%; transition: transform .5s cubic-bezier(.65,0,.35,1); }
@@ -109,139 +239,152 @@
   }
   .hero-slide::after{
     content:""; position:absolute; inset:0;
-    background: linear-gradient(0deg, rgba(75,30,45,0.62), rgba(75,30,45,0) 55%);
+    background: linear-gradient(0deg, rgba(30,20,20,0.62), rgba(30,20,20,0) 58%);
   }
-  .hero-slide .cap{ position:relative; z-index:1; color:#fff; padding: 18px 22px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:18px; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .hero-slide .cap{ position:relative; z-index:1; color:#fff; padding: 22px 26px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:19px; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
   .hero-slide.empty{ align-items:center; justify-content:center; }
-  .hero-slide.empty .cap{ font-size: 15px; opacity:.9; }
-  .hero-dots{ position:absolute; bottom:10px; right:16px; z-index:2; display:flex; gap:6px; }
-  .hero-dots span{ width:8px; height:8px; border-radius:50%; background: rgba(255,255,255,.5); cursor:pointer; }
-  .hero-dots span.active{ background:#fff; }
-  .hero-nav{ position:absolute; top:50%; transform:translateY(-50%); z-index:2; background: rgba(255,255,255,.85); border:none; width:34px; height:34px; border-radius:50%; font-weight:800; color:var(--ink); }
-  .hero-nav.prev{ left:12px; } .hero-nav.next{ right:12px; }
-  .hero-edit{ position:absolute; top:12px; right:12px; z-index:2; }
-
-  /* ---------- Filtros ---------- */
-  .filters{
-    display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:#fff;
-    border:2px solid var(--line); border-radius: 22px; padding: 12px 16px; margin-bottom: 20px;
+  .hero-slide.empty .cap{ font-size: 16px; opacity:.95; text-align:center; }
+  .hero-dots{ position:absolute; bottom:14px; right:20px; z-index:2; display:flex; gap:7px; }
+  .hero-dots span{ width:9px; height:9px; border-radius:50%; background: rgba(255,255,255,.5); cursor:pointer; }
+  .hero-dots span.active{ background: var(--ocre); }
+  .hero-nav{ position:absolute; top:50%; transform:translateY(-50%); z-index:2; background:rgba(255,255,255,.9); border:none; width:36px; height:36px; border-radius:50%; font-weight:800; font-size:18px; color:var(--ink); }
+  .hero-nav.prev{ left:14px; } .hero-nav.next{ right:14px; }
+  .hero-edit{ position:absolute; top:14px; right:14px; z-index:2; }
+  .hero-caption-line{
+    text-align:center; color:#fff8ea; font-size:14px; font-weight:700; margin: 0 0 30px;
+    background: var(--verde); border-radius: 0 0 30px 30px; padding: 14px 20px;
     box-shadow: var(--shadow);
   }
-  .filters input[type=text], .filters select{
-    font-family:'Inter',sans-serif; font-size:14px; padding: 9px 12px; border-radius: 14px;
-    border: 2px solid var(--line); background: var(--panel-2); color: var(--ink); min-width: 150px;
-  }
-  .filters .search-field{ flex:1; min-width: 200px; }
-  .view-toggle{ display:flex; gap:4px; background: var(--panel-2); border-radius: 999px; padding:4px; margin-left:auto; }
-  .view-toggle button{
-    border:none; background:transparent; padding: 8px 14px; border-radius: 999px; font-weight:700; font-size:12.5px; color: var(--ink-soft);
-  }
-  .view-toggle button.active{ background: var(--ocre); color: var(--ink); }
-
-  /* ---------- Grid normal ---------- */
-  .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(170px,1fr)); gap: 18px; }
-  .card{
-    background:#fff; border-radius: 20px; overflow:hidden; cursor:pointer; box-shadow: var(--shadow);
-    border: 3px solid #fff; transition: transform .15s ease, border-color .15s ease;
-    display:flex; flex-direction:column;
-  }
-  .card:hover{ transform: translateY(-4px) rotate(-0.5deg); }
-  .card .cover{ aspect-ratio: 3/4; background: var(--panel-2); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .card .cover img{ width:100%; height:100%; object-fit:cover; }
-  .card .cover .ph{ font-family:'Baloo 2',sans-serif; font-size:30px; color: var(--ink-soft); opacity:.5; }
-  .card .info{ padding: 10px 12px 12px; flex:1; display:flex; flex-direction:column; gap:4px; }
-  .card .t{ font-family:'Fredoka',sans-serif; font-weight:600; font-size: 14px; line-height:1.25; }
-  .card .a{ font-size: 12px; color: var(--ink-soft); }
-  .card .chips{ display:flex; gap:5px; flex-wrap:wrap; margin-top:auto; padding-top:6px; }
-  .chip{ font-size:10.5px; font-weight:700; padding: 3px 8px; border-radius: 999px; letter-spacing:.02em; }
-  .chip.genero{ background: rgba(122,75,152,0.14); color: var(--azulvioleta); }
-  .chip.disp{ background: rgba(70,139,105,0.16); color: var(--verde); }
-  .chip.prest{ background: rgba(228,194,97,0.35); color: #7a5c14; }
-  .chip.perdido{ background: rgba(171,71,123,0.18); color: var(--rojovioleta); }
-
-  .empty-msg{ text-align:center; padding: 50px 10px; color: var(--ink-soft); font-family:'Fredoka',sans-serif; font-size:16px; }
-
-  /* ---------- Modo carrusel por género ---------- */
-  .genre-row{ margin-bottom: 26px; }
-  .genre-row h3{ font-size: 16px; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-  .genre-row h3 .dot{ width:12px; height:12px; border-radius:50%; }
-  .carousel-strip{ display:flex; gap:14px; overflow-x:auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
-  .carousel-strip::-webkit-scrollbar{ height:8px; }
-  .carousel-strip::-webkit-scrollbar-thumb{ background: var(--line); border-radius:8px; }
-  .carousel-strip .card{ min-width: 150px; max-width:150px; scroll-snap-align:start; }
 
   /* ---------- Modal ---------- */
-  .overlay{ position:fixed; inset:0; background: rgba(75,30,45,0.45); display:none; align-items:center; justify-content:center; padding: 20px; z-index: 50; }
+  .overlay{ position:fixed; inset:0; background: rgba(30,20,20,0.45); display:none; align-items:center; justify-content:center; padding: 20px; z-index: 50; }
   .overlay.show{ display:flex; }
-  .modal{ background:#fff; border-radius: 26px; max-width: 780px; width:100%; max-height: 88vh; overflow:auto; box-shadow: var(--shadow); position:relative; }
-  .modal-close{ position:absolute; top:14px; right:14px; background: var(--panel-2); border:none; width:32px; height:32px; border-radius:50%; font-weight:800; font-size:16px; color:var(--ink); z-index:2; }
-  .book-detail{ display:flex; gap: 22px; padding: 26px; flex-wrap:wrap; }
-  .book-detail .cover-lg{ width: 220px; flex:none; border-radius: 14px; overflow:hidden; background: var(--panel-2); aspect-ratio:3/4; }
+  .modal{ background:#fff; border-radius: 28px; max-width: 780px; width:100%; max-height: 88vh; overflow:auto; box-shadow: var(--shadow-lg); position:relative; }
+  .modal-close{ position:absolute; top:16px; right:16px; background: var(--panel-2); border:none; width:34px; height:34px; border-radius:50%; font-weight:800; font-size:17px; color:var(--ink); z-index:2; }
+  .book-detail{ display:flex; gap: 24px; padding: 30px 28px 28px; flex-wrap:wrap; }
+  .book-detail .cover-lg{ display:flex; width: 220px; flex:none; border-radius: 18px; overflow:hidden; background: var(--panel-2); aspect-ratio:3/4; }
   .book-detail .cover-lg img{ width:100%; height:100%; object-fit:cover; }
   .book-detail .meta{ flex:1; min-width:240px; }
-  .book-detail h2{ font-size: 22px; margin-bottom: 3px; }
-  .book-detail .author{ color: var(--ink-soft); font-weight:600; margin-bottom:10px; }
-  .kv-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size:13px; margin: 10px 0; }
-  .kv-grid div b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); font-weight:700; }
-  .resumen{ font-size: 13.5px; margin-top: 12px; background: var(--panel-2); padding: 12px 14px; border-radius: 14px; }
-  .resumen b{ display:block; font-size:10.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px; }
-  .modal-actions{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .book-detail h2{ font-size: 25px; margin-bottom: 3px; }
+  .book-detail .author{ color: var(--ink-soft); font-weight:600; margin-bottom:12px; font-family:'Fredoka',sans-serif; }
+  .kv-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; font-size:13.5px; font-weight:600; margin: 14px 0; }
+  .kv-grid div{ background: var(--panel-2); border-radius:14px; padding:8px 12px; }
+  .kv-grid div b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:2px; }
+  .resumen{ font-size: 13.5px; margin-top: 14px; background: rgba(228,194,97,0.20); padding: 14px 16px; border-radius: 18px; }
+  .resumen b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:5px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; align-items:center; }
 
   /* ---------- Formularios ---------- */
-  .field{ display:flex; flex-direction:column; gap:5px; margin-bottom: 12px; }
-  .field label{ font-size: 11.5px; font-weight:700; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom: 14px; }
+  .field label{ font-size: 11.5px; font-weight:800; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
   .field input, .field textarea, .field select{
-    font-family:'Inter',sans-serif; font-size:14px; padding: 10px 12px; border-radius: 12px;
+    font-family:'Inter',sans-serif; font-size:14px; font-weight:600; padding: 11px 14px; border-radius: 14px;
     border: 2px solid var(--line); background:#fff; color: var(--ink);
   }
+  .field input:focus, .field textarea:focus, .field select:focus{ outline:none; border-color: var(--verdeazul); }
   .field textarea{ resize:vertical; }
-  .form-note{ font-size:12px; color: var(--ink-soft); margin-bottom: 10px; }
-  .ok-box{ background: rgba(70,139,105,0.12); border:2px solid rgba(70,139,105,0.4); border-radius:16px; padding:18px; text-align:center; }
-  .ok-box .big{ font-size:34px; }
+  .form-note{ font-size:12.5px; color: var(--ink-soft); margin-bottom: 12px; font-weight:600; }
+  .ok-box{ background: rgba(107,185,107,0.14); border-radius:24px; padding:22px; text-align:center; }
+  .ok-box .big{ font-size:40px; }
 
   /* ---------- Editor ---------- */
-  .edit-badge{ background: var(--ocre); color:var(--ink); font-weight:800; font-size:11px; padding:4px 10px; border-radius:999px; }
+  .edit-badge{ background: var(--ocre); color:#5c3d0e; font-weight:800; font-size:11.5px; padding:6px 12px; border-radius:999px; }
   .cover-upload{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
   .cover-upload .drop{
-    width:150px; aspect-ratio:3/4; border-radius:14px; border:2px dashed var(--line); background:var(--panel-2);
-    display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; text-align:center; font-size:11.5px; color:var(--ink-soft); padding:8px;
+    width:150px; aspect-ratio:3/4; border-radius:18px; border:2px dashed var(--line); background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; text-align:center; font-size:11.5px; font-weight:600; color:var(--ink-soft); padding:10px;
   }
   .cover-upload .drop img{ width:100%; height:100%; object-fit:cover; }
+  .solic-actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
   .toast{
     position: fixed; left:50%; bottom:26px; transform: translateX(-50%) translateY(20px);
-    background: var(--ink); color:#fff; padding: 12px 20px; border-radius: 999px; font-size:13.5px;
-    opacity:0; transition: all .25s ease; z-index: 90; box-shadow: var(--shadow); pointer-events:none;
+    background: var(--ink); color:#fff; padding: 13px 22px; border-radius: 999px; font-size:14px; font-weight:600;
+    opacity:0; transition: all .25s ease; z-index: 90; box-shadow: var(--shadow-lg); pointer-events:none;
   }
   .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
 
-  footer.site{ text-align:center; color: var(--ink-soft); font-size:12px; margin-top: 40px; }
+  footer.site{
+    text-align:center; color: var(--ink-soft); font-size:12.5px; font-weight:600; margin-top: 12px;
+    padding: 10px 20px;
+  }
 
   @media (max-width: 640px){
+    .brand h1{ font-size: 16px; }
+    .page-hero h2{ font-size:26px; }
     .kv-grid{ grid-template-columns: 1fr; }
-    .book-detail{ flex-direction:column; }
+    .book-detail{ flex-direction:column; padding: 26px 20px; }
     .book-detail .cover-lg{ width: 160px; margin: 0 auto; }
+    .view-toggle{ width:100%; justify-content:center; }
+    .catalog-head{ flex-direction:column; align-items:flex-start; }
+    .filtro-panel{ left:0; right:auto; width: calc(100vw - 60px); max-width:300px; }
   }
 </style>
 
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="logo-slot" id="logo-slot"><div class="blob"></div></div>
-      <div>
-        <h1>Catálogo Raíz de Barro</h1>
-        <div class="sub">Biblioteca Comunitaria · descubre y reserva un libro</div>
+<div class="site-hero">
+  <div class="site-hero-decor"></div>
+  <div class="hero-inner">
+    <h1 class="sr-only">Catálogo Raíz de Barro — Biblioteca Comunitaria</h1>
+    <header class="top">
+      <div class="top-actions">
+        <div class="logo-slot" id="logo-slot"><div class="blob"></div></div>
+        <span id="editor-badge" class="edit-badge" style="display:none;">Modo bibliotecario</span>
+        <button class="pill-btn on-dark small" id="btn-edit-logo" style="display:none;">Cambiar logo</button>
+        <button class="pill-btn on-dark small" id="btn-edit-theme" style="display:none;">Personalizar diseño</button>
+        <input type="file" id="logo-file" accept="image/*" style="display:none;">
+        <button class="pill-btn on-dark small" id="btn-staff">Acceso del equipo</button>
+        <button class="pill-btn on-dark small" id="btn-logout-staff" style="display:none;">Salir</button>
+      </div>
+    </header>
+
+    <div class="page-hero">
+      <span class="eyebrow">Biblioteca</span>
+      <h2>Catálogo de libros</h2>
+      <p>Busca tu próxima historia favorita entre cuentos, aventuras y mucho más.</p>
+    </div>
+    <div class="search-row">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="f-search" placeholder="Buscar por título o autor…" />
+      </div>
+      <button class="pill-btn btn-buscar" id="btn-search">Buscar</button>
+      <button class="pill-btn on-dark" id="btn-clear">Limpiar</button>
+      <div class="filtro-wrap">
+        <button class="pill-btn on-dark" id="btn-filtro">Filtro</button>
+        <div class="filtro-panel" id="filtro-panel">
+          <div class="field">
+            <label>Disponibilidad</label>
+            <select id="f-disp">
+              <option value="">Disponibles y prestados</option>
+              <option value="disponible">Solo disponibles</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Año de publicación</label>
+            <select id="f-anio"><option value="">Todos los años</option></select>
+          </div>
+          <button class="pill-btn primary small" id="filtro-aplicar" style="width:100%;">Aplicar filtro</button>
+        </div>
       </div>
     </div>
-    <div class="top-actions">
-      <span id="editor-badge" class="edit-badge" style="display:none;">Modo bibliotecario</span>
-      <button class="pill-btn ghost small" id="btn-edit-logo" style="display:none;">Cambiar logo</button>
-      <button class="pill-btn ghost small" id="btn-edit-theme" style="display:none;">Personalizar diseño</button>
-      <input type="file" id="logo-file" accept="image/*" style="display:none;">
-      <button class="pill-btn ghost small" id="btn-staff">Acceso del equipo</button>
-      <button class="pill-btn ghost small" id="btn-logout-staff" style="display:none;">Salir</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="cat-label">Categorías</div>
+
+  <select id="f-genero" style="display:none;"><option value="">Todos los géneros</option></select>
+  <div class="category-row" id="category-row"></div>
+
+  <div class="catalog-head">
+    <h3>Todos los libros <span class="count-badge" id="result-count">0 resultados</span></h3>
+    <div class="view-toggle">
+      <button data-view="normal" class="active">Normal</button>
+      <button data-view="carrusel">Carrusel por género</button>
     </div>
-  </header>
+  </div>
+
+  <div id="catalog-area"></div>
 
   <section class="hero" id="hero">
     <div class="hero-track" id="hero-track"></div>
@@ -250,24 +393,7 @@
     <div class="hero-dots" id="hero-dots"></div>
     <button class="pill-btn small ghost hero-edit" id="btn-edit-hero" style="display:none;">Editar imágenes</button>
   </section>
-
-  <div class="filters">
-    <div class="field search-field" style="margin:0;">
-      <input type="text" id="f-search" placeholder="Buscar por título o autor…" />
-    </div>
-    <select id="f-genero"><option value="">Todos los géneros</option></select>
-    <select id="f-anio"><option value="">Todos los años</option></select>
-    <select id="f-disp">
-      <option value="">Disponibles y prestados</option>
-      <option value="disponible">Solo disponibles</option>
-    </select>
-    <div class="view-toggle">
-      <button data-view="normal" class="active">Normal</button>
-      <button data-view="carrusel">Carrusel por género</button>
-    </div>
-  </div>
-
-  <div id="catalog-area"></div>
+  <p class="hero-caption-line">Biblioteca Raíz de Barro · Leer es sembrar imaginación</p>
 
   <footer class="site">Biblioteca Comunitaria Raíz de Barro · Carrera 11 B No. 48 J - Sur 28, Bogotá D.C. · raizdebarro@gmail.com</footer>
 </div>
@@ -344,9 +470,24 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const GENRE_COLORS = ["--ocre","--esmeralda","--verdeazul","--azulvioleta","--rojovioleta","--azul","--verde","--verdeamarillo"];
+  const GENRE_COLORS_HEX = { "--ocre":"#e4c261", "--esmeralda":"#6bb96b", "--verdeazul":"#447f8d", "--azulvioleta":"#7a4b98", "--rojovioleta":"#ab477b", "--azul":"#4a69ac", "--verde":"#468b69", "--verdeamarillo":"#accb49" };
   function genreColor(name){
     let h = 0; for(const c of String(name)) h = (h*31 + c.charCodeAt(0)) % GENRE_COLORS.length;
     return `var(${GENRE_COLORS[h]})`;
+  }
+  // Color de una categoría/género: toma el valor VIVO de la variable CSS
+  // (así, si el bibliotecario personaliza los colores del catálogo, las
+  // pastillas de categoría y las portadas sin carátula se actualizan solas).
+  function genreColorHex(name){
+    let h = 0; for(const c of String(name)) h = (h*31 + c.charCodeAt(0)) % GENRE_COLORS.length;
+    const varName = GENRE_COLORS[h];
+    const live = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return live || GENRE_COLORS_HEX[varName];
+  }
+  function hexToRgba(hex, alpha){
+    const m = hex.replace('#','');
+    const r = parseInt(m.substring(0,2),16), g = parseInt(m.substring(2,4),16), b = parseInt(m.substring(4,6),16);
+    return `rgba(${r},${g},${b},${alpha})`;
   }
 
   let books = [];
@@ -398,7 +539,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Hero / carrusel de inicio
+  // Banner inferior (imágenes del panel de inicio)
   // ---------------------------------------------------------------------
   function renderHero(){
     const track = $("#hero-track"), dots = $("#hero-dots");
@@ -419,13 +560,31 @@
   setInterval(()=>{ if(carrusel.length>1){ heroIndex=(heroIndex+1)%carrusel.length; renderHero(); } }, 6000);
 
   // ---------------------------------------------------------------------
-  // Filtros
+  // Filtros: buscador + panel "Filtro" (disponibilidad, año) + categorías
   // ---------------------------------------------------------------------
   function populateFilterOptions(){
     const generos = [...new Set(books.map(b=>b.genero).filter(Boolean))].sort();
     const anios = [...new Set(books.map(b=>b.anioPublicacion).filter(Boolean))].sort().reverse();
     $("#f-genero").innerHTML = `<option value="">Todos los géneros</option>` + generos.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
     $("#f-anio").innerHTML = `<option value="">Todos los años</option>` + anios.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+    renderCategoryPills(generos);
+  }
+  function renderCategoryPills(generos){
+    const current = $("#f-genero").value;
+    const pills = [{v:"", label:"Todas"}].concat(generos.map(g=>({v:g, label:g})));
+    $("#category-row").innerHTML = pills.map(p=>{
+      const colorHex = p.v ? genreColorHex(p.v) : "#447f8d";
+      const active = p.v === current ? "active" : "";
+      return `<button type="button" class="cat-pill ${active}" data-genero="${escapeHtml(p.v)}" style="--pill-fg:${colorHex}; --pill-bg:${hexToRgba(colorHex,0.14)}">${escapeHtml(p.label)}</button>`;
+    }).join("");
+    $$(".cat-pill").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        $("#f-genero").value = btn.dataset.genero;
+        $$(".cat-pill").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        renderCatalog();
+      });
+    });
   }
   function filteredBooks(){
     const q = $("#f-search").value.trim().toLowerCase();
@@ -441,29 +600,71 @@
     });
   }
 
+  $("#btn-search").addEventListener("click", renderCatalog);
+  $("#btn-clear").addEventListener("click", ()=>{
+    $("#f-search").value = ""; $("#f-anio").value = ""; $("#f-disp").value = ""; $("#f-genero").value = "";
+    $$(".cat-pill").forEach(b=>b.classList.remove("active"));
+    const todasBtn = $('.cat-pill[data-genero=""]'); if(todasBtn) todasBtn.classList.add("active");
+    $("#filtro-panel").classList.remove("show");
+    renderCatalog();
+  });
+  $("#btn-filtro").addEventListener("click", (e)=>{ e.stopPropagation(); $("#filtro-panel").classList.toggle("show"); });
+  document.addEventListener("click", (e)=>{
+    if(!e.target.closest(".filtro-wrap")) $("#filtro-panel").classList.remove("show");
+  });
+  $("#filtro-aplicar").addEventListener("click", ()=>{ renderCatalog(); $("#filtro-panel").classList.remove("show"); });
+  $("#f-anio").addEventListener("change", renderCatalog);
+  $("#f-disp").addEventListener("change", renderCatalog);
+
   // ---------------------------------------------------------------------
   // Render de tarjetas
   // ---------------------------------------------------------------------
+  // Portada de color liso cuando el libro no tiene imagen: color por género
+  // (el mismo color que su pastilla de categoría), o estable por título si
+  // el libro no tiene género asignado.
+  const PH_FALLBACK_HEX = ["#447f8d","#7a4b98","#ab477b","#4a69ac","#468b69","#8b4545","#e4c261","#accb49"];
+  function phHash(s){
+    let h = 0; for(const c of String(s||"libro")) h = (h*31 + c.charCodeAt(0)) % 100003;
+    return h;
+  }
+  function coverColorHex(b){
+    if(b.genero) return genreColorHex(b.genero);
+    const h = phHash((b.titulo||"") + "·" + (b.autor||""));
+    return PH_FALLBACK_HEX[h % PH_FALLBACK_HEX.length];
+  }
   function coverImg(b){
-    return b.portadaUrl
-      ? `<img src="${escapeHtml(b.portadaUrl)}" alt="Carátula de ${escapeHtml(b.titulo)}" loading="lazy">`
-      : `<div class="ph">📖</div>`;
+    if(b.portadaUrl){
+      return `<img src="${escapeHtml(b.portadaUrl)}" alt="Carátula de ${escapeHtml(b.titulo)}" loading="lazy">`;
+    }
+    return `<div class="ph-color" style="background:${coverColorHex(b)}"></div>`;
   }
   function cardHtml(b){
     const dispChip = b.estado === "disponible" ? `<span class="chip disp">Disponible</span>` : (b.estado === "perdido" ? `<span class="chip perdido">No disponible</span>` : `<span class="chip prest">Prestado</span>`);
-    const genChip = b.genero ? `<span class="chip genero">${escapeHtml(b.genero)}</span>` : "";
+    const genTag = b.genero ? `<span class="cover-tag">${escapeHtml(b.genero)}</span>` : "";
+    const reservarBtn = b.estado === "disponible"
+      ? `<button class="pill-btn btn-reservar small" data-action="reservar" data-id="${escapeHtml(b.id)}">Reservar</button>`
+      : `<button class="pill-btn ghost small" disabled>No disponible</button>`;
     return `<div class="card" data-id="${escapeHtml(b.id)}">
-      <div class="cover">${coverImg(b)}</div>
+      <div class="cover">
+        ${genTag}
+        <span class="cover-icon">📚</span>
+        ${coverImg(b)}
+      </div>
       <div class="info">
         <div class="t">${escapeHtml(b.titulo||"Sin título")}</div>
         <div class="a">${escapeHtml(b.autor||"Autor desconocido")}</div>
-        <div class="chips">${genChip}${dispChip}</div>
+        <div class="tags-row">${dispChip}</div>
+        <div class="card-actions">
+          <button class="pill-btn btn-ver small" data-action="ver" data-id="${escapeHtml(b.id)}">Ver</button>
+          ${reservarBtn}
+        </div>
       </div>
     </div>`;
   }
   function renderCatalog(){
     const area = $("#catalog-area");
     const list = filteredBooks();
+    $("#result-count").textContent = `${list.length} ${list.length===1?'resultado':'resultados'}`;
     if(list.length === 0){
       area.innerHTML = `<div class="empty-msg">🐛 No encontramos libros con esos filtros. ¡Prueba buscando algo distinto!</div>`;
       return;
@@ -479,13 +680,19 @@
           <div class="carousel-strip">${byGenre[g].map(cardHtml).join("")}</div>
         </div>`).join("");
     }
-    $$(".card").forEach(card => card.addEventListener("click", ()=> openDetail(card.dataset.id)));
+    $$(".card").forEach(card => card.addEventListener("click", (e)=>{
+      if(e.target.closest("[data-action]")) return;
+      openDetail(card.dataset.id);
+    }));
+    $$('[data-action="ver"]').forEach(btn => btn.addEventListener("click", (e)=>{ e.stopPropagation(); openDetail(btn.dataset.id); }));
+    $$('[data-action="reservar"]').forEach(btn => btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const b = books.find(x=>String(x.id)===String(btn.dataset.id));
+      if(b) openReserva(b);
+    }));
   }
 
   $("#f-search").addEventListener("input", renderCatalog);
-  $("#f-genero").addEventListener("change", renderCatalog);
-  $("#f-anio").addEventListener("change", renderCatalog);
-  $("#f-disp").addEventListener("change", renderCatalog);
   $$(".view-toggle button").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $$(".view-toggle button").forEach(b=>b.classList.remove("active"));
@@ -770,17 +977,18 @@
     { key: "--bg", label: "Fondo de la página" },
     { key: "--ink", label: "Texto / acento principal" },
     { key: "--ink-soft", label: "Texto secundario" },
-    { key: "--ocre", label: "Color 1 (ocre)" },
-    { key: "--esmeralda", label: "Color 2 (esmeralda)" },
-    { key: "--verdeazul", label: "Color 3 (verde azulado)" },
-    { key: "--azulvioleta", label: "Color 4 (azul violeta)" },
-    { key: "--rojovioleta", label: "Color 5 (rojo violeta)" },
-    { key: "--azul", label: "Color 6 (azul)" },
-    { key: "--verde", label: "Color 7 (verde)" },
-    { key: "--verdeamarillo", label: "Color 8 (verde amarillo)" }
+    { key: "--carmin", label: "Botón Reservar y Buscar (texto) · títulos" },
+    { key: "--ocre", label: "Botón Reservar y Buscar (fondo) · categoría" },
+    { key: "--esmeralda", label: "Etiqueta Disponible · categoría" },
+    { key: "--verdeazul", label: "Franja superior · botón Filtro · categoría" },
+    { key: "--azulvioleta", label: "Categoría" },
+    { key: "--rojovioleta", label: "Etiqueta Prestado · categoría" },
+    { key: "--azul", label: "Botón Ver · categoría" },
+    { key: "--verde", label: "Botones de confirmar (verde) · categoría" },
+    { key: "--verdeamarillo", label: "Categoría" }
   ];
   const DEFAULT_THEME = {
-    "--bg":"#fffaf1", "--ink":"#8b4545", "--ink-soft":"#7a4b98",
+    "--bg":"#fbf7ee", "--ink":"#3d2b2b", "--ink-soft":"#7a6a6a", "--carmin":"#8b4545",
     "--ocre":"#e4c261", "--esmeralda":"#6bb96b", "--verdeazul":"#447f8d",
     "--azulvioleta":"#7a4b98", "--rojovioleta":"#ab477b", "--azul":"#4a69ac",
     "--verde":"#468b69", "--verdeamarillo":"#accb49"
@@ -869,7 +1077,7 @@
   $("#btn-edit-hero").addEventListener("click", ()=>{
     $("#edit-content").innerHTML = `
       <h2>Imágenes del panel de inicio</h2>
-      <p class="form-note">Sube imágenes destacadas para la portada del catálogo. Podrás elegir qué parte de cada foto se muestra.</p>
+      <p class="form-note">Sube imágenes destacadas para el banner del catálogo. Podrás elegir qué parte de cada foto se muestra.</p>
       <div id="hero-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;"></div>
       <input type="file" id="hero-file" accept="image/*" style="display:none;">
       <button class="pill-btn ghost" id="hero-add">+ Agregar imagen</button>`;
