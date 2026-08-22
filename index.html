@@ -87,9 +87,10 @@
   .theme-field label{ font-size:12.5px; font-weight:700; color: var(--ink); }
 
   .crop-viewport{
-    position:relative; width:100%; max-width:480px; aspect-ratio: 4.5/1; margin:0 auto;
-    overflow:hidden; border-radius: 20px; background:#1a1a1a; touch-action:none; cursor:grab;
-    border:3px solid var(--line);
+    position:relative; width:100%; max-width:480px; aspect-ratio: 3/1; margin:0 auto;
+    overflow:hidden; border-radius: 16px; background:#1a1a1a; touch-action:none; cursor:grab;
+    mask-image: radial-gradient(ellipse 68% 72% at 50% 50%, black 55%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 68% 72% at 50% 50%, black 55%, transparent 100%);
   }
   .crop-viewport:active{ cursor:grabbing; }
   .crop-viewport img{ position:absolute; top:0; left:0; user-select:none; -webkit-user-drag:none; pointer-events:none; }
@@ -777,7 +778,7 @@
           </div>
           <div class="modal-actions">
             ${b.estado === "disponible"
-              ? `<button class="pill-btn primary" id="btn-reservar">📚 Reservar este libro</button>`
+              ? `<button class="pill-btn primary" id="btn-reservar"> Reservar este libro</button>`
               : `<span class="chip ${b.estado==="perdido"?"perdido":"prest"}" style="padding:9px 16px;">${b.estado==="perdido"?"No disponible por el momento":"Actualmente prestado"}</span>`}
             ${editBtn}
           </div>
