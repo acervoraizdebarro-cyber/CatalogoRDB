@@ -127,6 +127,10 @@
     background: rgba(137,196,177,0.30);
   }
   .hero-inner{ position:relative; z-index:1; max-width:1180px; margin:0 auto; padding: 0 20px; }
+  .logo-watermark{
+    position:absolute; top:-40px; right:-60px; width:420px; height:auto;
+    opacity:.16; pointer-events:none; z-index:0; transform:rotate(-8deg);
+  }
   .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   .page-hero{ text-align:left; max-width:640px; }
   .page-hero .eyebrow{ display:block; font-family:'Inter',sans-serif; font-weight:800; font-size:18px; letter-spacing:.16em; color: var(--ocre); margin-bottom:10px; text-transform: uppercase; }
@@ -352,6 +356,7 @@
 <div class="site-hero">
   <div class="site-hero-decor"></div>
   <div class="hero-inner">
+    <img src="logo-transparente.png" class="logo-watermark" alt="">
     <h1 class="sr-only">Catálogo Raíz de Barro — Biblioteca Comunitaria</h1>
     <header class="top">
       <div class="top-actions">
@@ -365,6 +370,7 @@
       </div>
     </header>
 
+    <img src="logo-transparente.png" class="logo-watermark" alt="">
     <div class="page-hero">
       <span class="eyebrow">Biblioteca</span>
       <h2>Catálogo de libros</h2>
