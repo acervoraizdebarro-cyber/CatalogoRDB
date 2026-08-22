@@ -647,6 +647,7 @@
     const a = $("#f-anio").value;
     const d = $("#f-disp").value;
     return books.filter(b=>{
+      if(b.estado === "perdido" && !isEditor) return false;
       if(q && !((b.titulo||"").toLowerCase().includes(q) || (b.autor||"").toLowerCase().includes(q))) return false;
       if(g && b.genero !== g) return false;
       if(a && String(b.anioPublicacion) !== String(a)) return false;
