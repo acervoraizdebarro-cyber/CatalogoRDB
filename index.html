@@ -36,6 +36,8 @@
     --ocre: #e4c261;
     --carmin: #8b4545;
     --rojovioleta: #ab477b;
+    --gris-tierra: #8d7f7f;
+    --naranja-tierra: #c17f3e;
     --azulvioleta: #7a4b98;
     --azul: #4a69ac;
     --verdeazul: #447f8d;
@@ -167,6 +169,7 @@
     box-shadow: var(--shadow-pop);
   }
   .cat-pill:hover{ transform: translateY(-1px); opacity:1; }
+  .cat-pill-outline{ background:#fff; color: var(--pill-fg, var(--ink)); border-color: var(--pill-fg, var(--ink)); }
   .cat-pill.active{ opacity:1; box-shadow: 0 0 0 3px rgba(61,43,43,0.16); }
 
   /* ---------- Encabezado de listado ---------- */
@@ -276,6 +279,18 @@
   .resumen{ font-size: 13.5px; margin-top: 14px; background: rgba(228,194,97,0.20); padding: 14px 16px; border-radius: 18px; }
   .resumen b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:5px; }
   .modal-actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; align-items:center; }
+
+  .detail-page{ display:none; }
+  .detail-page.active{ display:flex; }
+  .page-flip{
+    position:absolute; top:50%; transform: translateY(-50%); z-index:3;
+    background:#fff; border:2px solid var(--line); width:38px; height:38px; border-radius:50%;
+    font-weight:800; font-size:16px; color: var(--ink); box-shadow: var(--shadow-pop, var(--shadow));
+  }
+  .page-flip.next{ right:16px; }
+  .page-flip.prev{ left:16px; }
+  .page-resumen-text{ font-size: 14px; line-height:1.6; color: var(--ink); }
+  .page-resumen-title{ font-family:'Baloo 2',sans-serif; font-size:15px; font-weight:800; color: var(--carmin); margin-bottom:10px; }
 
   /* ---------- Formularios ---------- */
   .field{ display:flex; flex-direction:column; gap:6px; margin-bottom: 14px; }
@@ -405,7 +420,9 @@
 <div class="overlay" id="overlay-detail">
   <div class="modal">
     <button class="modal-close" data-close>×</button>
-    <div class="book-detail" id="book-detail-content"></div>
+    <button class="page-flip next" id="detail-next" style="display:none;">›</button>
+    <button class="page-flip prev" id="detail-prev" style="display:none;">‹</button>
+    <div id="book-detail-content"></div>
   </div>
 </div>
 
@@ -474,23 +491,50 @@
 
   const GENRE_COLORS = ["--ocre","--esmeralda","--verdeazul","--azulvioleta","--rojovioleta","--azul","--verde","--verdeamarillo"];
   const GENRE_COLORS_HEX = { "--ocre":"#e4c261", "--esmeralda":"#6bb96b", "--verdeazul":"#447f8d", "--azulvioleta":"#7a4b98", "--rojovioleta":"#ab477b", "--azul":"#4a69ac", "--verde":"#468b69", "--verdeamarillo":"#accb49" };
+
+  const FIXED_CATEGORIES = [
+    { label: "Álbum", varName: "--ocre" },
+    { label: "Cuento", varName: "--esmeralda" },
+    { label: "Poesía", varName: "--rojovioleta" },
+    { label: "Novela", varName: "--azul" },
+    { label: "Teatro", varName: "--gris-tierra" },
+    { label: "Historieta y tira cómica", varName: "--carmin" },
+    { label: "Leyenda y mitología", varName: "--naranja-tierra" },
+    { label: "Novela gráfica", varName: "--azulvioleta" },
+    { label: "Referencia", varName: "--verdeazul", outline: true },
+    { label: "General", varName: "--ink", outline: true }
+  ];
+  const FIXED_CATEGORIES_HEX = {
+    "--ocre":"#e4c261", "--esmeralda":"#6bb96b", "--rojovioleta":"#ab477b", "--azul":"#4a69ac",
+    "--gris-tierra":"#8d7f7f", "--carmin":"#8b4545", "--naranja-tierra":"#c17f3e",
+    "--azulvioleta":"#7a4b98", "--verdeazul":"#447f8d", "--ink":"#8b4545"
+  };
+  function fixedCategoryColor(varName){
+    const live = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return live || FIXED_CATEGORIES_HEX[varName] || "#447f8d";
+  }
   function genreColor(name){
     let h = 0; for(const c of String(name)) h = (h*31 + c.charCodeAt(0)) % GENRE_COLORS.length;
     return `var(${GENRE_COLORS[h]})`;
   }
-  // Color de una categoría/género: toma el valor VIVO de la variable CSS
-  // (así, si el bibliotecario personaliza los colores del catálogo, las
-  // pastillas de categoría y las portadas sin carátula se actualizan solas).
   function genreColorHex(name){
+    const found = FIXED_CATEGORIES.find(c => c.label === name);
+    if(found) return fixedCategoryColor(found.varName);
     let h = 0; for(const c of String(name)) h = (h*31 + c.charCodeAt(0)) % GENRE_COLORS.length;
     const varName = GENRE_COLORS[h];
     const live = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     return live || GENRE_COLORS_HEX[varName];
   }
-  function hexToRgba(hex, alpha){
+    function hexToRgba(hex, alpha){
     const m = hex.replace('#','');
     const r = parseInt(m.substring(0,2),16), g = parseInt(m.substring(2,4),16), b = parseInt(m.substring(4,6),16);
     return `rgba(${r},${g},${b},${alpha})`;
+  }
+  const RESUMEN_MAX_PALABRAS = 90;
+  function limitarResumen(texto){
+    const palabras = String(texto||"").trim().split(/\s+/);
+    if(palabras.length <= RESUMEN_MAX_PALABRAS) return texto;
+    return palabras.slice(0, RESUMEN_MAX_PALABRAS).join(" ") + "…";
   }
 
   let books = [];
@@ -570,15 +614,16 @@
     const anios = [...new Set(books.map(b=>b.anioPublicacion).filter(Boolean))].sort().reverse();
     $("#f-genero").innerHTML = `<option value="">Todos los géneros</option>` + generos.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
     $("#f-anio").innerHTML = `<option value="">Todos los años</option>` + anios.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
-    renderCategoryPills(generos);
+    renderCategoryPills();
   }
-  function renderCategoryPills(generos){
+  function renderCategoryPills(){
     const current = $("#f-genero").value;
-    const pills = [{v:"", label:"Todas"}].concat(generos.map(g=>({v:g, label:g})));
+    const pills = [{v:"", label:"Todas"}].concat(FIXED_CATEGORIES.map(c=>({v:c.label, label:c.label, outline:c.outline, varName:c.varName})));
     $("#category-row").innerHTML = pills.map(p=>{
-      const colorHex = p.v ? genreColorHex(p.v) : "#447f8d";
+      const colorHex = p.v ? fixedCategoryColor(p.varName) : "#447f8d";
       const active = p.v === current ? "active" : "";
-      return `<button type="button" class="cat-pill ${active}" data-genero="${escapeHtml(p.v)}" style="--pill-fg:${colorHex}; --pill-bg:${hexToRgba(colorHex,0.14)}">${escapeHtml(p.label)}</button>`;
+      const outlineClass = p.outline ? "cat-pill-outline" : "";
+      return `<button type="button" class="cat-pill ${outlineClass} ${active}" data-genero="${escapeHtml(p.v)}" style="--pill-fg:${colorHex}; --pill-bg:${hexToRgba(colorHex,0.14)}">${escapeHtml(p.label)}</button>`;
     }).join("");
     $$(".cat-pill").forEach(btn=>{
       btn.addEventListener("click", ()=>{
@@ -705,29 +750,61 @@
     const b = books.find(x=>String(x.id)===String(id));
     if(!b) return;
     const editBtn = isEditor ? `<button class="pill-btn ghost small" id="btn-edit-book">✏️ Editar en el catálogo</button>` : "";
-    $("#book-detail-content").innerHTML = `
-      <div class="cover-lg">${coverImg(b)}</div>
-      <div class="meta">
-        <h2>${escapeHtml(b.titulo||"Sin título")}</h2>
-        <div class="author">${escapeHtml(b.autor||"Autor desconocido")}${b.autoresAdicionales&&b.autoresAdicionales.length?", "+escapeHtml(b.autoresAdicionales.join(", ")):""}</div>
-        <div class="kv-grid">
-          <div><b>Género</b>${escapeHtml(b.genero||"—")}</div>
-          <div><b>Año de publicación</b>${escapeHtml(b.anioPublicacion||"—")}</div>
-          <div><b>Editorial</b>${escapeHtml(b.editorial||"—")}</div>
-          <div><b>Idioma</b>${escapeHtml(b.idioma||"—")}</div>
-          <div><b>ISBN</b>${escapeHtml(b.isbn||"—")}</div>
-          <div><b>Rótulo / clasificación</b>${escapeHtml(b.rotulo||b.clasificacion||"—")}</div>
-          <div><b>Estado</b>${b.estado==="disponible"?"Disponible":(b.estado==="perdido"?"No disponible (perdido/dañado)":"Prestado")}</div>
-        </div>
-        ${b.resumen ? `<div class="resumen"><b>Resumen</b>${escapeHtml(b.resumen)}</div>` : ""}
-        <div class="modal-actions">
-          ${b.estado === "disponible"
-            ? `<button class="pill-btn primary" id="btn-reservar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px; margin-right:6px;"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Reservar este libro</button>`
-            : `<span class="chip ${b.estado==="perdido"?"perdido":"prest"}" style="padding:9px 16px;">${b.estado==="perdido"?"No disponible por el momento":"Actualmente prestado"}</span>`}
-          ${editBtn}
+    const tieneResumen = !!(b.resumen && b.resumen.trim());
+
+    const pagina1 = `
+      <div class="book-detail detail-page active" id="detail-page-1">
+        <div class="cover-lg">${coverImg(b)}</div>
+        <div class="meta">
+          <h2>${escapeHtml(b.titulo||"Sin título")}</h2>
+          <div class="author">${escapeHtml(b.autor||"Autor desconocido")}${b.autoresAdicionales&&b.autoresAdicionales.length?", "+escapeHtml(b.autoresAdicionales.join(", ")):""}</div>
+          <div class="kv-grid">
+            <div><b>Género</b>${escapeHtml(b.genero||"—")}</div>
+            <div><b>Año de publicación</b>${escapeHtml(b.anioPublicacion||"—")}</div>
+            <div><b>Editorial</b>${escapeHtml(b.editorial||"—")}</div>
+            <div><b>Idioma</b>${escapeHtml(b.idioma||"—")}</div>
+            <div><b>ISBN</b>${escapeHtml(b.isbn||"—")}</div>
+            <div><b>Rótulo / clasificación</b>${escapeHtml(b.rotulo||b.clasificacion||"—")}</div>
+            <div><b>Estado</b>${b.estado==="disponible"?"Disponible":(b.estado==="perdido"?"No disponible (perdido/dañado)":"Prestado")}</div>
+          </div>
+          <div class="modal-actions">
+            ${b.estado === "disponible"
+              ? `<button class="pill-btn primary" id="btn-reservar">📚 Reservar este libro</button>`
+              : `<span class="chip ${b.estado==="perdido"?"perdido":"prest"}" style="padding:9px 16px;">${b.estado==="perdido"?"No disponible por el momento":"Actualmente prestado"}</span>`}
+            ${editBtn}
+          </div>
         </div>
       </div>`;
+
+    const pagina2 = tieneResumen ? `
+      <div class="book-detail detail-page" id="detail-page-2">
+        <div class="cover-lg">${coverImg(b)}</div>
+        <div class="meta">
+          <div class="page-resumen-title">Resumen de «${escapeHtml(b.titulo||"este libro")}»</div>
+          <div class="page-resumen-text">${escapeHtml(limitarResumen(b.resumen))}</div>
+        </div>
+      </div>` : "";
+
+    $("#book-detail-content").innerHTML = pagina1 + pagina2;
     $("#overlay-detail").classList.add("show");
+
+    const nextBtn = $("#detail-next"), prevBtn = $("#detail-prev");
+    if(tieneResumen){
+      nextBtn.style.display = ""; prevBtn.style.display = "none";
+      nextBtn.onclick = ()=>{
+        $("#detail-page-1").classList.remove("active");
+        $("#detail-page-2").classList.add("active");
+        nextBtn.style.display = "none"; prevBtn.style.display = "";
+      };
+      prevBtn.onclick = ()=>{
+        $("#detail-page-2").classList.remove("active");
+        $("#detail-page-1").classList.add("active");
+        prevBtn.style.display = "none"; nextBtn.style.display = "";
+      };
+    }else{
+      nextBtn.style.display = "none"; prevBtn.style.display = "none";
+    }
+
     if(b.estado === "disponible") $("#btn-reservar").addEventListener("click", ()=>{ $("#overlay-detail").classList.remove("show"); openReserva(b); });
     if(isEditor) $("#btn-edit-book").addEventListener("click", ()=>{ $("#overlay-detail").classList.remove("show"); openEdit(b); });
   }
