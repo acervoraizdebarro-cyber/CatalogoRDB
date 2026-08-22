@@ -167,6 +167,7 @@
     font-family:'Inter',sans-serif; background: var(--pill-fg, var(--verdeazul)); color:#fff;
     transition: all .15s ease; opacity:.88;
     box-shadow: var(--shadow-pop);
+    white-space: nowrap; flex-shrink: 0;
   }
   .cat-pill:hover{ transform: translateY(-1px); opacity:1; }
   .cat-pill-outline{ background:#fff; color: var(--pill-fg, var(--ink)); border-color: var(--pill-fg, var(--ink)); }
@@ -612,7 +613,7 @@
   function populateFilterOptions(){
     const generos = [...new Set(books.map(b=>b.genero).filter(Boolean))].sort();
     const anios = [...new Set(books.map(b=>b.anioPublicacion).filter(Boolean))].sort().reverse();
-    $("#f-genero").innerHTML = `<option value="">Todos los géneros</option>` + generos.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+    $("#f-genero").innerHTML = `<option value="">Todos los géneros</option>` + FIXED_CATEGORIES.map(c=>`<option value="${escapeHtml(c.label)}">${escapeHtml(c.label)}</option>`).join("");
     $("#f-anio").innerHTML = `<option value="">Todos los años</option>` + anios.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
     renderCategoryPills();
   }
