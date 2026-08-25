@@ -366,10 +366,7 @@
     <h1 class="sr-only">Catálogo Raíz de Barro — Biblioteca Comunitaria</h1>
     <header class="top">
       <div class="top-actions">
-        <div class="logo-slot" id="logo-slot"><div class="blob"></div></div>
         <span id="editor-badge" class="edit-badge" style="display:none;">Modo bibliotecario</span>
-        <button class="pill-btn ghost small" id="btn-edit-logo" style="display:none;">Cambiar logo</button>
-        <input type="file" id="logo-file" accept="image/*" style="display:none;">
         <button class="pill-btn ghost small" id="btn-edit-theme" style="display:none;">Personalizar diseño</button>
         <button class="pill-btn ghost small" id="btn-edit-watermark" style="display:none;">Editar marca de agua</button>
         <input type="file" id="logo-file" accept="image/*" style="display:none;">
@@ -882,7 +879,6 @@
     $("#btn-staff").style.display = isEditor ? "none" : "";
     $("#btn-logout-staff").style.display = isEditor ? "" : "none";
     $("#btn-edit-hero").style.display = isEditor ? "" : "none";
-    $("#btn-edit-logo").style.display = isEditor ? "" : "none";
     $("#btn-edit-theme").style.display = isEditor ? "" : "none";
     $("#btn-edit-watermark").style.display = isEditor ? "" : "none";
   }
@@ -1269,24 +1265,6 @@
     const panel = document.getElementById("wm-panel");
     if(panel) panel.remove();
   }
-  $("#btn-edit-logo").addEventListener("click", ()=> $("#logo-file").click());
-  $("#logo-file").addEventListener("change", async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
-    toast("Actualizando logo…");
-    try{
-      const blob = await enhanceCoverImage(file, 240, 240);
-      const path = `logo-${Date.now()}.jpg`;
-      const { error } = await supabaseClient.storage.from("carrusel").upload(path, blob, { upsert:true, contentType:"image/jpeg" });
-      if(error) throw error;
-      const { data } = supabaseClient.storage.from("carrusel").getPublicUrl(path);
-      logoUrl = data.publicUrl;
-      await saveConfig();
-      renderLogo();
-      toast("Logo actualizado.");
-    }catch(err){ toast("No se pudo actualizar el logo."); }
-    e.target.value = "";
-  });
-
   $("#btn-edit-hero").addEventListener("click", ()=>{
     $("#edit-content").innerHTML = `
       <h2>Imágenes del panel de inicio</h2>
@@ -1344,7 +1322,6 @@
     populateFilterOptions();
     renderCatalog();
     renderHero();
-    renderLogo();
     renderWatermarks();
   }
   init();
