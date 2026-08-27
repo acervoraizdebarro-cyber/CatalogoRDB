@@ -1155,7 +1155,7 @@
     applyTheme();
   }
   async function saveConfig(){
-    await kvSet("config_catalogo", JSON.stringify({ logoUrl, theme: themeOverrides, marcas: watermarks }));
+    return await kvSet("config_catalogo", JSON.stringify({ logoUrl, theme: themeOverrides, marcas: watermarks }));
   }
 
   function renderWatermarks(){
@@ -1253,7 +1253,9 @@
       renderWatermarks(); attachWatermarkDrag(); renderWmPanel();
     });
     $("#wm-save").addEventListener("click", async ()=>{
-      await saveConfig(); exitWmEditing(); toast("Marca de agua guardada.");
+      const ok = await saveConfig();
+      exitWmEditing();
+      toast(ok ? "Marca de agua guardada." : "No se pudo guardar. Intenta de nuevo.");
     });
     $("#wm-cancel").addEventListener("click", async ()=>{
       await loadConfig(); renderWatermarks(); exitWmEditing();
