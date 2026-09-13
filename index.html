@@ -916,6 +916,7 @@
     $("#e-file").addEventListener("change", async (e)=>{
       const file = e.target.files[0]; if(!file) return;
       toast("Mejorando y subiendo imagen…");
+      const portadaAnterior = b.portadaUrl;
       try{
         const blob = await enhanceCoverImage(file);
         const path = `${b.id}-${Date.now()}.jpg`;
@@ -925,6 +926,12 @@
         b.portadaUrl = data.publicUrl;
         $("#e-drop").innerHTML = `<img src="${escapeHtml(b.portadaUrl)}">`;
         toast("Carátula lista.");
+        if(portadaAnterior){
+          try{
+            const oldPath = decodeURIComponent(portadaAnterior.split("/portadas/")[1] || "");
+            if(oldPath) await supabaseClient.storage.from("portadas").remove([oldPath]);
+          }catch(e){ /* si falla borrar la anterior, no pasa nada grave */ }
+        }
       }catch(err){ toast("No se pudo subir la imagen."); }
     });
     $("#e-save").addEventListener("click", async ()=>{
@@ -1300,7 +1307,17 @@
         <button class="pill-btn ghost small" data-remove="${i}">Quitar</button>
       </div>`).join("") || `<p class="form-note">Aún no hay imágenes.</p>`;
     $$(".hero-cap").forEach(inp => inp.addEventListener("change", async ()=>{ carrusel[+inp.dataset.i].caption = inp.value; await saveCarrusel(); renderHero(); }));
-    $$("[data-remove]").forEach(btn => btn.addEventListener("click", async ()=>{ carrusel.splice(+btn.dataset.remove,1); await saveCarrusel(); renderHeroEditList(); renderHero(); }));
+    $$("[data-remove]").forEach(btn => btn.addEventListener("click", async ()=>{
+      const item = carrusel[+btn.dataset.remove];
+      carrusel.splice(+btn.dataset.remove,1);
+      await saveCarrusel(); renderHeroEditList(); renderHero();
+      if(item && item.url){
+        try{
+          const oldPath = decodeURIComponent(item.url.split("/carrusel/")[1] || "");
+          if(oldPath) await supabaseClient.storage.from("carrusel").remove([oldPath]);
+        }catch(e){ /* si falla borrar la imagen, no pasa nada grave */ }
+      }
+    }));
   }
 
   // ---------------------------------------------------------------------
