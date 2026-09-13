@@ -79,7 +79,7 @@
     background: conic-gradient(from 20deg, var(--ocre), var(--esmeralda), var(--verdeclaro), var(--azulvioleta), var(--rojovioleta), var(--ocre));
     flex: none; border:2px solid rgba(255,248,234,.5);
   }
-  .logo-slot img{ width:42px; height:42px; border-radius: 13px; object-fit:cover; flex:none; display:block; border:2px solid rgba(255,248,234,.5); }
+  
 
   .theme-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 14px; margin: 14px 0 18px; }
   .theme-field{ display:flex; align-items:center; gap:10px; background: var(--panel-2); border:2px solid var(--line); border-radius: 16px; padding: 8px 10px; }
@@ -1140,11 +1140,6 @@
   });
 
   let logoUrl = "";
-  function renderLogo(){
-    $("#logo-slot").innerHTML = logoUrl
-      ? `<img src="${escapeHtml(logoUrl)}" alt="Logo de la biblioteca">`
-      : `<div class="blob"></div>`;
-  }
   let watermarks = [];
   const WATERMARK_IMG = "logo-transparente.png";
   function wmUid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
