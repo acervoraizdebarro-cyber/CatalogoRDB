@@ -836,7 +836,7 @@
   // ---------------------------------------------------------------------
   // Reserva de préstamo → tabla solicitudes_prestamo (visible en el acervo)
   // ---------------------------------------------------------------------
-  function openReserva(b){
+    function openReserva(b){
     $("#reserva-content").innerHTML = `
       <h2>Reservar «${escapeHtml(b.titulo)}»</h2>
       <p class="form-note">Completa tus datos. El equipo de la biblioteca confirmará tu préstamo.</p>
@@ -844,11 +844,29 @@
       <div class="field"><label>Documento de identidad</label><input id="r-doc"></div>
       <div class="field"><label>Teléfono</label><input id="r-tel"></div>
       <div class="field"><label>Correo electrónico</label><input id="r-mail" type="email"></div>
+      <div style="position:absolute; left:-9999px; top:-9999px;" aria-hidden="true">
+        <label>No llenar este campo</label>
+        <input id="r-web" tabindex="-1" autocomplete="off">
+      </div>
       <button class="pill-btn primary" style="width:100%;" id="r-submit">Confirmar reserva</button>`;
     $("#overlay-reserva").classList.add("show");
     $("#r-submit").addEventListener("click", async ()=>{
       const nombre = $("#r-nombre").value.trim(), doc = $("#r-doc").value.trim(), tel = $("#r-tel").value.trim(), mail = $("#r-mail").value.trim();
       if(!nombre || !doc || !tel || !mail){ toast("Por favor completa todos los datos."); return; }
+
+      // Campo trampa: si algo lo llenó (un humano nunca lo ve), se ignora en silencio.
+      if($("#r-web").value.trim()){
+        $("#reserva-content").innerHTML = `<div class="ok-box"><div class="big">🎉</div><h3>¡Reserva enviada!</h3><p>Te contactaremos pronto para confirmar tu préstamo de «${escapeHtml(b.titulo)}».</p></div>`;
+        return;
+      }
+
+      // Límite de tiempo: máximo una reserva cada 30 segundos desde este navegador.
+      const ultima = Number(localStorage.getItem("ultima_reserva_ts") || 0);
+      if(Date.now() - ultima < 30000){
+        toast("Ya enviaste una reserva hace un momento. Espera unos segundos e intenta de nuevo.");
+        return;
+      }
+
       const btn = $("#r-submit"); btn.disabled = true; btn.textContent = "Enviando…";
       const { error } = await supabaseClient.from("solicitudes_prestamo").insert([{
         libro_id: String(b.id), titulo: b.titulo, autor: b.autor,
@@ -856,6 +874,7 @@
       }]);
       btn.disabled = false;
       if(error){ toast("No se pudo enviar la reserva. Intenta de nuevo."); btn.textContent = "Confirmar reserva"; return; }
+      localStorage.setItem("ultima_reserva_ts", String(Date.now()));
       $("#reserva-content").innerHTML = `<div class="ok-box"><div class="big">🎉</div><h3>¡Reserva enviada!</h3><p>Te contactaremos pronto para confirmar tu préstamo de «${escapeHtml(b.titulo)}».</p></div>`;
     });
   }
